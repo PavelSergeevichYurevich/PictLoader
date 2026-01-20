@@ -1,5 +1,6 @@
-import os
+import asyncio
 from pathlib import Path
+from typing import List
 import uuid
 from fastapi import APIRouter, HTTPException
 from app.core.settings import settings
@@ -19,18 +20,28 @@ async def lisf_files():
     }
     
 @router.post('/download')
-async def download_by_url(url: str):
-    try:
-        url_path = Path(url)
-        file_extension = url_path.suffix 
-        if len(file_extension) > 4: file_extension = "jpg"
-        random_name = f'{uuid.uuid4()}.{file_extension}'
-        path = await download_image(url, random_name)
+async def download_by_url(urls: List[str]):
+   try:
+        tasks:list = []
+        for u in urls:
+            url_path = Path(u)
+            ext = url_path.suffix if len(url_path.suffix) <= 5 else '.jpg'
+            random_name = f'{uuid.uuid4()}{ext}'
+            tasks.append(download_image(u, random_name))
+            
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+           
+        fls:dict = {}
+        for i, path in enumerate(results):
+            if isinstance(path, Path):
+                fls[path.name] = str(path)
+            else:
+                fls[urls[i]] = f'Error: {str(path)}'
+
         return {
             'status': 'success',
-            'filename': random_name,
-            'absolute_path': str(path)
+            'files': fls
         }
-        
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Ошибка при скачивании: {str(e)}") 
+   except Exception as e:
+       raise HTTPException(status_code=400, detail=f"Критическая ошибка: {str(e)}")
+           
