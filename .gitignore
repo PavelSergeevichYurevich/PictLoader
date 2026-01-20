@@ -1,1 +1,4 @@
 /env
+.env
+/storage
+**/__pycashe__/
