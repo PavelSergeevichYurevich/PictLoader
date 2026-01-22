@@ -1,10 +1,12 @@
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.core.database import get_db
+from app.models.image import Image
 from app.models.user import User
-from app.schemas.user import UserCreate, UserResponse
+from app.schemas.user import ImageHistory, UserCreate, UserResponse
 from app.core.security import hash_password
 
 router = APIRouter(prefix='/users', tags=['Users'])
@@ -32,7 +34,12 @@ async def register_user(user_in: UserCreate, db:AsyncSession = (Depends(get_db))
     
     return new_user
 
-
+@router.get('/{user_id}/mages', response_model=List[ImageHistory])
+async def get_history(user_id: int, db:AsyncSession = Depends(get_db)):
+    stmnt = select(Image).where(Image.user_id == user_id)
+    result = await db.execute(stmnt)
+    images = result.scalars().all()
+    return images
     
     
     

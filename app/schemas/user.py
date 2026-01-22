@@ -1,3 +1,4 @@
+from datetime import datetime
 from pydantic import BaseModel, Field
 
 class UserCreate(BaseModel):
@@ -7,6 +8,12 @@ class UserCreate(BaseModel):
 class UserResponse(BaseModel):
     id: int
     username: str
+    
+class ImageHistory(BaseModel):
+    id: int
+    filename: str
+    created_at: datetime
+    
     
 class Config:
     from_attributes = True
