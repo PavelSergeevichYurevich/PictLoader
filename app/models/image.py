@@ -7,6 +7,7 @@ class Image(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     filename: Mapped[str] = mapped_column(String(255), nullable=False)
     source_url: Mapped[str] = mapped_column(nullable=True)
+    path: Mapped[str] = mapped_column(nullable=False)
     user_id:Mapped[int] = mapped_column(
         ForeignKey('users.id', ondelete='CASCADE'),
         nullable=False

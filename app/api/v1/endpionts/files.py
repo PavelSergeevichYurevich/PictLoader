@@ -2,8 +2,11 @@ import asyncio
 from pathlib import Path
 from typing import List
 import uuid
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.core.database import get_db
 from app.core.settings import settings
+from app.models.image import Image
 from app.services.downloader import download_image
 
 router = APIRouter()
@@ -20,7 +23,7 @@ async def lisf_files():
     }
     
 @router.post('/download')
-async def download_by_url(urls: List[str]):
+async def download_by_url(urls: List[str], user_id: int, db:AsyncSession = Depends(get_db)):
    try:
         tasks:list = []
         for u in urls:
@@ -34,9 +37,17 @@ async def download_by_url(urls: List[str]):
         fls:dict = {}
         for i, path in enumerate(results):
             if isinstance(path, Path):
+                new_img = Image(
+                    filename = path.name,
+                    source_url = urls[i],
+                    path = str(path),
+                    user_id = user_id
+                )
+                db.add(new_img)
                 fls[path.name] = str(path)
             else:
                 fls[urls[i]] = f'Error: {str(path)}'
+        await db.commit()
 
         return {
             'status': 'success',

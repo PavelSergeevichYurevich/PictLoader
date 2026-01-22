@@ -1,8 +1,8 @@
 from fastapi import FastAPI
-from app.api.route import router
+from app.api.v1.endpionts.files import router as files
 from app.core.settings import settings
 from contextlib import asynccontextmanager
-from app.api.v1.endpoints import router
+from app.api.v1.endpionts.user import router as reg
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print('Starting server...')
@@ -21,4 +21,5 @@ app = FastAPI(
 )
 
 
-app.include_router(router)
+app.include_router(reg)
+app.include_router(files)
