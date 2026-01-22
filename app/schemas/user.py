@@ -14,6 +14,10 @@ class ImageHistory(BaseModel):
     filename: str
     created_at: datetime
     
+class UserLogin(BaseModel):
+    username: str
+    password: str
+    
     
 class Config:
     from_attributes = True

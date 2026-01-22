@@ -20,6 +20,11 @@ class Settings(BaseSettings):
     # API Keys
     #PEXELS_API_KEY: str
     
+    SECRET_KEY: str = "super_secret_string_change_me_in_production"
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+
+    
     APP_HOST: str = '127.0.0.1'
     APP_PORT: int = 8000
     

@@ -3,8 +3,7 @@ import httpx
 from pathlib import Path
 from app.core.settings import settings
 
-async def download_image(url: str, filename: str) -> Path:
-    target_path = settings.STORAGE_DIR/filename
+async def download_image(url: str, target_path: Path) -> Path:
     
     async with httpx.AsyncClient() as client:
         response = await client.get(url, follow_redirects=True)

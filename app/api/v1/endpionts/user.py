@@ -1,13 +1,14 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, desc
 
 from app.core.database import get_db
 from app.models.image import Image
 from app.models.user import User
-from app.schemas.user import ImageHistory, UserCreate, UserResponse
-from app.core.security import hash_password
+from app.schemas.user import ImageHistory, UserCreate, UserResponse, UserLogin
+from app.core.security import hash_password, create_access_token, verify_password
 
 router = APIRouter(prefix='/users', tags=['Users'])
 
@@ -34,12 +35,34 @@ async def register_user(user_in: UserCreate, db:AsyncSession = (Depends(get_db))
     
     return new_user
 
-@router.get('/{user_id}/mages', response_model=List[ImageHistory])
+@router.get('/{user_id}/images', response_model=List[ImageHistory])
 async def get_history(user_id: int, db:AsyncSession = Depends(get_db)):
-    stmnt = select(Image).where(Image.user_id == user_id)
+    stmnt = select(Image).where(Image.user_id == user_id).order_by(desc(Image.created_at))
     result = await db.execute(stmnt)
     images = result.scalars().all()
     return images
+
+@router.post('/login')
+async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
+    query = select(User).where(User.username == form_data.username)
+    result = await db.execute(query)
+    user = result.scalar_one_or_none()
+    
+    if not user or not verify_password(form_data.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail='Invalid username or password'
+        )
+    access_token = create_access_token(data={'sub': str(user.id)})
+    
+    return {
+        "access_token": access_token,
+        "token_type": "bearer"
+    }
+    
+
+
+
     
     
     
