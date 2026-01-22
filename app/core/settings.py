@@ -6,10 +6,16 @@ class Settings(BaseSettings):
     BASE_DIR: Path = Path(__file__).resolve().parent.parent.parent
     STORAGE_DIR: Path = BASE_DIR / "storage"
 
-    # БД (подставятся из .env, если там есть такие ключи)
-    #DB_HOST: str = "localhost"
-    #DB_PORT: int = 5432
-    #DATABASE_URL: str
+    #БД
+    DB_USER: str
+    DB_PASS: str
+    DB_NAME: str
+    DB_HOST: str
+    DB_PORT: int
+    
+    @property
+    def DATABASE_URL(self) -> str:
+        return f'postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}'
 
     # API Keys
     #PEXELS_API_KEY: str
@@ -20,6 +26,6 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     
     # Автоматическое чтение из .env файла
-    model_config = SettingsConfigDict(env_file=".env")
+    model_config = SettingsConfigDict(env_file=".env", extra='ignore')
 
 settings = Settings()
