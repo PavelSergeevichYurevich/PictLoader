@@ -1,9 +1,11 @@
 import asyncio
+import os
 from pathlib import Path
 from typing import List
 import uuid
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from app.core.database import get_db
 from app.core.security import get_current_user
 from app.core.settings import settings
@@ -62,4 +64,43 @@ async def download_by_url(urls: List[str],
         }
    except Exception as e:
        raise HTTPException(status_code=400, detail=f"Критическая ошибка: {str(e)}")
+   
+@router.delete('/{image_id}')
+async def delete_image(image_id:int, 
+                       current_user: User = Depends(get_current_user), 
+                       db: AsyncSession = Depends(get_db)):
+    
+    stmnt = select(Image).where(Image.id == image_id)
+    result = await db.execute(stmnt)
+    img = result.scalar_one_or_none()
+    
+    if not img:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Image does not exists'
+        )
+        
+    if img.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='You can only delete your own images'
+        )
+    try: 
+        file_path = Path(img.path)
+        file_path.unlink(missing_ok=True)
+        
+        await db.delete(img)
+        await db.commit()
+        
+        return {"detail": "Image and file deleted successfully"}
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error during deletion: {str(e)}"
+        )
+
+    
+   
+
            
