@@ -18,11 +18,11 @@ class Settings(BaseSettings):
         return f'postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}'
 
     # API Keys
-    #PEXELS_API_KEY: str
+    PEXELS_API_KEY: str
     
-    SECRET_KEY: str = "super_secret_string_change_me_in_production"
-    ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    SECRET_KEY: str
+    ALGORITHM: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int
 
     
     APP_HOST: str = '127.0.0.1'
