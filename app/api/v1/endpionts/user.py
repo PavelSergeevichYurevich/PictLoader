@@ -62,24 +62,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSessi
         "token_type": "bearer"
     }
     
-@router.get('/test/pexels')
-async def test_pexels(q: str = 'cat'):
-    try:
-        results = await search_pexels(q, limit = 5, page = 1)
-    except SearchAuthError:
-        raise HTTPException(status_code=502, detail='Pexels authentication error')
-    except SearchRateLimitError:
-        raise HTTPException(
-            status_code=429,
-            detail="Pexels rate limit exceeded"
-        )
-    except SearchUpstreamError:
-        raise HTTPException(
-            status_code=503,
-            detail="Pexels service unavailable"
-        ) 
-        
-    return {'count': len(results), 'first': results[0].model_dump() if results else None}
+
         
     
 

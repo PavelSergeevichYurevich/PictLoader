@@ -3,6 +3,7 @@ from app.api.v1.endpionts.files import router as files
 from app.core.settings import settings
 from contextlib import asynccontextmanager
 from app.api.v1.endpionts.user import router as reg
+from app.api.v1.endpionts.image import router as img
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print('Starting server...')
@@ -23,4 +24,5 @@ app = FastAPI(
 
 app.include_router(reg)
 app.include_router(files)
+app.include_router(img)
 
