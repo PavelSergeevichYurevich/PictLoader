@@ -11,3 +11,11 @@ class SearchResult(BaseModel):
     page_url: AnyUrl | HttpUrl | None 
     class Config:
         frozen = True
+        
+class SearchResponse(BaseModel):
+    items: list[SearchResult]
+    count: int
+    page: int
+    limit: int
+    provider_used: str
+    

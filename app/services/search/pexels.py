@@ -26,7 +26,7 @@ async def search_pexels(query: str, limit: int = 20, page: int = 1) -> list[Sear
             elif response.status_code == 429:
                 raise SearchRateLimitError("Pexels returned 429")
             elif response.status_code >= 500:
-                raise SearchUpstreamError("Pexels timeout")
+                raise SearchUpstreamError("Pexels service error")
             else:
                 raise SearchUpstreamError()
        
